@@ -1,0 +1,49 @@
+"department_code","srt","closed_tickets","sla_rate"
+DBL,Business Licence Change of Use (Five Uses) Case,457,28.67
+DBL,Tenant Improvement Program Request Case,368,57.07
+DBL,Building and Development Inquiry Case,81895,57.08
+DBL,Business Licence Request Case,49599,61.1
+DBL,Business Patio Inquiry Case,335,67.46
+DBL,Bylaw Compliance and Property Admin Request Case,380,83.95
+DBL,Address Change Request Case,80,85.0
+DBL,Short-Term Rental Concern Case,3678,88.58
+DBL,Vancouver Building Bylaw Inquiry Case,1117,88.63
+DBL,Private Property Inquiry Case,1478,89.38
+DBL,Private Property Tree Removal Concern Case,574,90.94
+DBL,Short-Term Rental Request Case,1124,91.28
+DBL,Private Property Concern Case,13336,95.12
+DBL,Noise on Private Property Case,16193,95.31
+DBL,Graffiti Removal - Private Property Case,2569,95.45
+DBL,On-Duty Inspector Inquiry Case,1088,96.6
+DBL,Private Property Construction Concern Case,5099,98.78
+DBL,Private Property Construction Noise Case,4018,99.25
+DBL,Animal Services Inquiry Case,2604,99.77
+DBL,Animal Concern Case,13852,99.94
+DBL,Dog Licence Case,8057,99.98
+DBL,Feeding Wildlife Case,528,100.0
+DBL,Lost Pets Case,2640,100.0
+PDS,Business Support Request Case,312,6.73
+PDS,Business Improvement Area Inquiry Case,105,39.05
+PDS,Urban Planning Request Case,234,47.01
+PDS,Sustainability Inquiry Case,252,64.29
+PDS,ZZ OLD - Private Property Tree Removal Case,190,71.05
+PDS,Landscape Request Case,219,71.23
+PDS,Planner Appointment Request Case,341,73.61
+PDS,Public View Assessment Request Case,74,89.19
+PDS,Character Merit Assessment Request Case,365,97.81
+PR,Parks Washroom Servicing Case,516,11.63
+PR,Pest Management Inquiry Case,385,29.09
+PR,Parks Operations and Maintenance Case,2972,29.24
+PR,Recreation Feedback Case,1404,58.69
+PR,City and Park Trees Maintenance Case,36123,60.27
+PR,Parks Feedback Case,5274,64.3
+PR,Rats and Rodents Case,1183,76.42
+PR,Park Board Commissioner Feedback Case,3620,80.8
+PR,Park Improvement Case,2286,83.46
+PR,Urban Issues in Parks Case,8066,94.72
+PR,Vancouver Recreation Portal Support Case,180,95.56
+PR,Park Ranger Request Case,9954,96.99
+PR,Park Facility Maintenance Request,2894,99.72
+PR,Graffiti Removal - Park Property Case,1025,99.8
+PR,Canada Geese Nests Case,276,100.0
+PR,Park Drinking Fountain Maintenance Request,103,100.0
