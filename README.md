@@ -88,7 +88,8 @@ vancouver-311-sla-analysis/
 ├── sql/
 │   ├── 01_cleaning_view.sql
 │   ├── 02_analysis_layer.sql
-│   └── 03_queries.sql
+│   ├── 03_queries.sql
+│   └── 04_validation_and_supplementary_analysis.sql
 └── dashboard/
     └── vancouver_311_dashboard.html
 ```
