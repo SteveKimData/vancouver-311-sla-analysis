@@ -1,0 +1,57 @@
+"department_name","department_code","total_closed","sla_met","sla_missed","sla_pct","pct_of_total_misses"
+Streets Furniture,ENG,3783,502,3281,13.27,1.45
+Streets Design Branch,ENG,473,164,309,34.67,0.14
+Transportation Design,ENG,801,310,491,38.7,0.22
+Transportation Planning,ENG,387,156,231,40.31,0.1
+Traffic and Data Management,ENG,8767,3804,4963,43.39,2.2
+Community Transportation Branch,ENG,1689,735,954,43.52,0.42
+Utilities Management,ENG,758,350,408,46.17,0.18
+Development and Major Projects Branch,ENG,1419,668,751,47.08,0.33
+Streets Horticulture,ENG,775,381,394,49.16,0.17
+Services Centre,DBL,82266,46961,35305,57.08,15.63
+Waterworks Design,ENG,5803,3343,2460,57.61,1.09
+Planning,PDS,1448,854,594,58.98,0.26
+Parking Management,ENG,5216,3127,2089,59.95,0.92
+Urban Forestry,PR,37967,23063,14904,60.74,6.6
+Licence Office,DBL,50056,30435,19621,60.8,8.69
+Waterworks Operations,ENG,15136,9464,5672,62.53,2.51
+Traffic and Electrical Operations and Design,ENG,25215,16056,9159,63.68,4.06
+Sustainability,PDS,252,162,90,64.29,0.04
+Development Review Branch,DBL,335,226,109,67.46,0.05
+Corporate Services,PR,10298,7140,3158,69.33,1.4
+Park Operations,PR,6994,4881,2113,69.79,0.94
+Integrated Graffiti Management,ENG,10141,7092,3049,69.93,1.35
+Solid Waste Programs,ENG,5001,3525,1476,70.49,0.65
+Streets Operations,ENG,53487,38015,15472,71.07,6.85
+Landscape,PDS,409,291,118,71.15,0.05
+Sanitation Services,ENG,232321,168066,64255,72.34,28.45
+Bylaw Fines,FSC,858,642,216,74.83,0.1
+Utility Billing,FSC,1331,998,333,74.98,0.15
+Film and Special Events Office,ENG,2070,1577,493,76.18,0.22
+Business and Election Services,CMO,31490,24385,7105,77.44,3.15
+Property Tax,FSC,3004,2359,645,78.53,0.29
+Collections and Customer Service,FSC,2972,2412,560,81.16,0.25
+Sewer Operations,ENG,9834,8158,1676,82.96,0.74
+"311 Contact Centre",,52462,43545,8917,83.0,3.95
+Planning and Development,PR,2286,1908,378,83.46,0.17
+Sewers and Drainage Design,ENG,1255,1048,207,83.51,0.09
+Bylaw Administration,DBL,460,387,73,84.13,0.03
+Vacancy Tax,FSC,8369,7118,1251,85.05,0.55
+Operations - Emergency Services,VFRS,1221,1039,182,85.09,0.08
+Building Review Branch,DBL,1117,990,127,88.63,0.06
+Proactive Enforcement,DBL,4802,4284,518,89.21,0.23
+Parking Enforcement and Operations,ENG,72997,65502,7495,89.73,3.32
+Arboriculture Inspection,DBL,574,522,52,90.94,0.02
+Park Rangers,PR,18536,17354,1182,93.62,0.52
+False Alarm Reduction Program,VPD,4977,4669,308,93.81,0.14
+Street Use Management,ENG,2931,2767,164,94.4,0.07
+Property Use Inspections,DBL,33576,31891,1685,94.98,0.75
+Kent Construction Supplies and Services,ENG,3879,3728,151,96.11,0.07
+Inspections,DBL,1088,1051,37,96.6,0.02
+Transfer and Landfill Operations,ENG,1024,995,29,97.17,0.01
+Social Policy,ACCS,3635,3580,55,98.49,0.02
+Community Safety and Risk Reduction,VFRS,7638,7531,107,98.6,0.05
+Environmental Protection,REFM,1275,1258,17,98.67,0.01
+Council Operations,CMO,11381,11238,143,98.74,0.06
+Building and Trades Inspections Clerks,DBL,9117,9025,92,98.99,0.04
+Animal Services,DBL,27681,27664,17,99.94,0.01
