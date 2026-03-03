@@ -1,1 +1,818 @@
-file:///C:/Users/supst/Downloads/vancouver_311_dashboard_v2.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vancouver 311 — SLA Performance Analysis</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --surface2: #1a1e2a;
+    --border: #252a38;
+    --accent: #4f8ef7;
+    --accent2: #f7914f;
+    --red: #f75f5f;
+    --green: #4fbd7c;
+    --yellow: #f7c94f;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 28px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .header-left h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--text);
+  }
+
+  .header-left p {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .kpi-strip {
+    display: flex;
+    gap: 8px;
+  }
+
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 12px 20px;
+    text-align: right;
+  }
+
+  .kpi .val {
+    font-family: var(--mono);
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--accent);
+    display: block;
+  }
+
+  .kpi .lbl {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 1px;
+    background: var(--border);
+    border-top: 1px solid var(--border);
+  }
+
+  .panel {
+    background: var(--surface);
+    padding: 28px 32px;
+  }
+
+  .panel.full { grid-column: 1 / -1; }
+  .panel.tall { min-height: 420px; }
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 24px;
+  }
+
+  .panel-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  .panel-sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+  }
+
+  /* Department bars — custom */
+  .bar-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
+    max-height: 340px;
+    padding-right: 4px;
+  }
+
+  .bar-list::-webkit-scrollbar { width: 3px; }
+  .bar-list::-webkit-scrollbar-track { background: transparent; }
+  .bar-list::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .bar-row {
+    display: grid;
+    grid-template-columns: 200px 1fr 60px 80px 70px;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+  }
+
+  .bar-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bar-track {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s ease;
+  }
+
+  .bar-pct {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-align: right;
+  }
+
+  .bar-miss {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  .color-bad { background: var(--red); }
+  .color-mid { background: var(--yellow); }
+  .color-ok  { background: var(--accent); }
+  .color-good{ background: var(--green); }
+
+  .text-bad  { color: var(--red); }
+  .text-mid  { color: var(--yellow); }
+  .text-ok   { color: var(--accent); }
+  .text-good { color: var(--green); }
+
+  /* SRT deep dive table */
+  .srt-tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 20px;
+  }
+
+  .tab {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 6px 16px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    background: transparent;
+    transition: all 0.15s;
+  }
+
+  .tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+  }
+
+  .srt-table { width: 100%; border-collapse: collapse; }
+  .srt-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    padding: 8px 0;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .srt-table th:last-child, .srt-table td:last-child { text-align: right; }
+  .srt-table td {
+    padding: 9px 0;
+    font-size: 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .srt-table td:nth-child(2) {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .sla-pill {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+
+  .insight-box {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    padding: 14px 18px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-top: 20px;
+  }
+
+  .insight-box strong { color: var(--text); }
+
+  footer {
+    padding: 20px 40px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Vancouver 311 — SLA Performance Analysis</h1>
+    <p>7-day resolution benchmark · Closed tickets only · Aug 2022 – Feb 2026</p>
+  </div>
+  <div class="kpi-strip">
+    <div class="kpi">
+      <span class="val">74.5%</span>
+      <span class="lbl">Overall SLA</span>
+    </div>
+    <div class="kpi">
+      <span class="val" style="color:var(--red)">226K+</span>
+      <span class="lbl">Missed Tickets</span>
+    </div>
+    <div class="kpi">
+      <span class="val" style="color:var(--yellow)">3</span>
+      <span class="lbl">Critical Depts</span>
+    </div>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- Time Series -->
+  <div class="panel full tall">
+    <div class="panel-header">
+      <span class="panel-title">SLA Rate Over Time</span>
+      <span class="panel-sub">Monthly · Oct 2025+ = incomplete window</span>
+    </div>
+    <div class="chart-wrap" style="height:300px">
+      <canvas id="timeChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Dept Code Summary -->
+  <div class="panel full">
+    <div class="panel-header">
+      <span class="panel-title">SLA Rate by Department Code</span>
+      <span class="panel-sub">Top-level aggregation · bubble size = ticket volume</span>
+    </div>
+    <div class="chart-wrap" style="height:260px">
+      <canvas id="deptCodeChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Department ranking -->
+  <div class="panel tall" style="grid-column: 1; min-height:500px">
+    <div class="panel-header">
+      <span class="panel-title">Subdepartment SLA Rate</span>
+      <span class="panel-sub">Sorted worst → best · ≥200 tickets</span>
+    </div>
+    <div class="bar-list" id="deptBars"></div>
+  </div>
+
+  <!-- Channel breakdown -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">SLA by Submission Channel</span>
+      <span class="panel-sub">% of total missed SLA shown</span>
+    </div>
+    <div class="chart-wrap" style="height:260px">
+      <canvas id="channelChart"></canvas>
+    </div>
+    <div class="insight-box">
+      <strong>Channel is not a meaningful lever.</strong> SLA rates vary only ~12pp across all channels. WEB drives 51% of total misses purely due to volume, not underperformance. Submission channel does not explain systemic delays.
+    </div>
+  </div>
+
+  <!-- SRT deep dive -->
+  <div class="panel full">
+    <div class="panel-header">
+      <span class="panel-title">Request Type Breakdown — Worst Departments</span>
+      <span class="panel-sub">≥50 closed tickets per type</span>
+    </div>
+    <div class="srt-tabs">
+      <button class="tab active" onclick="showDept('DBL', this)">DBL</button>
+      <button class="tab" onclick="showDept('PDS', this)">PDS</button>
+      <button class="tab" onclick="showDept('PR', this)">PR</button>
+    </div>
+    <table class="srt-table" id="srtTable">
+      <thead>
+        <tr>
+          <th>Request Type</th>
+          <th>Closed Tickets</th>
+          <th style="text-align:right">SLA Rate</th>
+        </tr>
+      </thead>
+      <tbody id="srtBody"></tbody>
+    </table>
+    <div class="insight-box" id="srtInsight"></div>
+  </div>
+
+</div>
+
+<footer>
+  <span>Data: City of Vancouver Open Data · Vancouver 311 Service Requests</span>
+  <span>7-day SLA benchmark is analytical — formal targets vary by department type</span>
+</footer>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+
+const timeSeries = [
+  ["2022-08",11474,75.20],["2022-09",23421,79.12],["2022-10",21089,80.34],
+  ["2022-11",24359,76.19],["2022-12",23137,62.06],["2023-01",20854,68.09],
+  ["2023-02",19158,70.16],["2023-03",24169,72.71],["2023-04",18815,69.49],
+  ["2023-05",24200,74.45],["2023-06",24167,73.41],["2023-07",24950,74.81],
+  ["2023-08",24747,66.65],["2023-09",21721,75.15],["2023-10",20282,70.03],
+  ["2023-11",22421,75.92],["2023-12",19480,69.85],["2024-01",22909,76.41],
+  ["2024-02",20509,72.97],["2024-03",22614,74.98],["2024-04",21946,74.06],
+  ["2024-05",23956,73.36],["2024-06",24155,72.60],["2024-07",26256,72.78],
+  ["2024-08",23026,70.19],["2024-09",20707,74.37],["2024-10",21998,77.78],
+  ["2024-11",24739,75.97],["2024-12",19696,72.09],["2025-01",21224,77.89],
+  ["2025-02",21910,77.60],["2025-03",19961,76.10],["2025-04",21900,78.18],
+  ["2025-05",24382,77.95],["2025-06",24613,75.89],["2025-07",26214,77.87],
+  ["2025-08",23028,77.33],["2025-09",16247,79.23],["2025-10",10345,78.51],
+  ["2025-11",10927,77.68],["2025-12",9405,70.82],["2026-01",10464,79.03],
+  ["2026-02",7645,90.43]
+];
+
+const departments = [
+  ["Streets Furniture","ENG",3783,13.27,1.45],
+  ["Streets Design Branch","ENG",473,34.67,0.14],
+  ["Transportation Design","ENG",801,38.70,0.22],
+  ["Transportation Planning","ENG",387,40.31,0.10],
+  ["Traffic and Data Management","ENG",8767,43.39,2.20],
+  ["Community Transportation Branch","ENG",1689,43.52,0.42],
+  ["Utilities Management","ENG",758,46.17,0.18],
+  ["Development and Major Projects","ENG",1419,47.08,0.33],
+  ["Streets Horticulture","ENG",775,49.16,0.17],
+  ["Services Centre","DBL",82266,57.08,15.63],
+  ["Waterworks Design","ENG",5803,57.61,1.09],
+  ["Planning","PDS",1448,58.98,0.26],
+  ["Parking Management","ENG",5216,59.95,0.92],
+  ["Urban Forestry","PR",37967,60.74,6.60],
+  ["Licence Office","DBL",50056,60.80,8.69],
+  ["Waterworks Operations","ENG",15136,62.53,2.51],
+  ["Traffic & Electrical Ops","ENG",25215,63.68,4.06],
+  ["Sustainability","PDS",252,64.29,0.04],
+  ["Development Review Branch","DBL",335,67.46,0.05],
+  ["Corporate Services","PR",10298,69.33,1.40],
+  ["Park Operations","PR",6994,69.79,0.94],
+  ["Integrated Graffiti Mgmt","ENG",10141,69.93,1.35],
+  ["Solid Waste Programs","ENG",5001,70.49,0.65],
+  ["Streets Operations","ENG",53487,71.07,6.85],
+  ["Landscape","PDS",409,71.15,0.05],
+  ["Sanitation Services","ENG",232321,72.34,28.45],
+  ["Bylaw Fines","FSC",858,74.83,0.10],
+  ["Utility Billing","FSC",1331,74.98,0.15],
+  ["Film & Special Events","ENG",2070,76.18,0.22],
+  ["Business & Election Svcs","CMO",31490,77.44,3.15],
+  ["Property Tax","FSC",3004,78.53,0.29],
+  ["Collections & Customer Svc","FSC",2972,81.16,0.25],
+  ["Sewer Operations","ENG",9834,82.96,0.74],
+  ["311 Contact Centre","",52462,83.00,3.95],
+  ["Planning and Development","PR",2286,83.46,0.17],
+  ["Sewers & Drainage Design","ENG",1255,83.51,0.09],
+  ["Bylaw Administration","DBL",460,84.13,0.03],
+  ["Vacancy Tax","FSC",8369,85.05,0.55],
+  ["Ops - Emergency Services","VFRS",1221,85.09,0.08],
+  ["Building Review Branch","DBL",1117,88.63,0.06],
+  ["Proactive Enforcement","DBL",4802,89.21,0.23],
+  ["Parking Enforcement & Ops","ENG",72997,89.73,3.32],
+  ["Arboriculture Inspection","DBL",574,90.94,0.02],
+  ["Park Rangers","PR",18536,93.62,0.52],
+  ["False Alarm Reduction","VPD",4977,93.81,0.14],
+  ["Street Use Management","ENG",2931,94.40,0.07],
+  ["Property Use Inspections","DBL",33576,94.98,0.75],
+  ["Kent Construction Supplies","ENG",3879,96.11,0.07],
+  ["Inspections","DBL",1088,96.60,0.02],
+  ["Transfer & Landfill Ops","ENG",1024,97.17,0.01],
+  ["Social Policy","ACCS",3635,98.49,0.02],
+  ["Community Safety & Risk","VFRS",7638,98.60,0.05],
+  ["Environmental Protection","REFM",1275,98.67,0.01],
+  ["Council Operations","CMO",11381,98.74,0.06],
+  ["Building & Trades Inspections","DBL",9117,98.99,0.04],
+  ["Animal Services","DBL",27681,99.94,0.01],
+];
+
+const srtData = {
+  DBL: [
+    ["Business Licence Change of Use (Five Uses) Case",457,28.67],
+    ["Tenant Improvement Program Request Case",368,57.07],
+    ["Building and Development Inquiry Case",81895,57.08],
+    ["Business Licence Request Case",49599,61.10],
+    ["Business Patio Inquiry Case",335,67.46],
+    ["Bylaw Compliance and Property Admin Request Case",380,83.95],
+    ["Address Change Request Case",80,85.00],
+    ["Short-Term Rental Concern Case",3678,88.58],
+    ["Vancouver Building Bylaw Inquiry Case",1117,88.63],
+    ["Private Property Inquiry Case",1478,89.38],
+    ["Private Property Tree Removal Concern Case",574,90.94],
+    ["Short-Term Rental Request Case",1124,91.28],
+    ["Private Property Concern Case",13336,95.12],
+    ["Noise on Private Property Case",16193,95.31],
+    ["Graffiti Removal - Private Property Case",2569,95.45],
+    ["On-Duty Inspector Inquiry Case",1088,96.60],
+    ["Private Property Construction Concern Case",5099,98.78],
+    ["Private Property Construction Noise Case",4018,99.25],
+    ["Animal Services Inquiry Case",2604,99.77],
+    ["Animal Concern Case",13852,99.94],
+    ["Dog Licence Case",8057,99.98],
+    ["Feeding Wildlife Case",528,100.00],
+    ["Lost Pets Case",2640,100.00],
+  ],
+  PDS: [
+    ["Business Support Request Case",312,6.73],
+    ["Business Improvement Area Inquiry Case",105,39.05],
+    ["Urban Planning Request Case",234,47.01],
+    ["Sustainability Inquiry Case",252,64.29],
+    ["ZZ OLD - Private Property Tree Removal Case",190,71.05],
+    ["Landscape Request Case",219,71.23],
+    ["Planner Appointment Request Case",341,73.61],
+    ["Public View Assessment Request Case",74,89.19],
+    ["Character Merit Assessment Request Case",365,97.81],
+  ],
+  PR: [
+    ["Parks Washroom Servicing Case",516,11.63],
+    ["Pest Management Inquiry Case",385,29.09],
+    ["Parks Operations and Maintenance Case",2972,29.24],
+    ["Recreation Feedback Case",1404,58.69],
+    ["City and Park Trees Maintenance Case",36123,60.27],
+    ["Parks Feedback Case",5274,64.30],
+    ["Rats and Rodents Case",1183,76.42],
+    ["Park Board Commissioner Feedback Case",3620,80.80],
+    ["Park Improvement Case",2286,83.46],
+    ["Urban Issues in Parks Case",8066,94.72],
+    ["Vancouver Recreation Portal Support Case",180,95.56],
+    ["Park Ranger Request Case",9954,96.99],
+    ["Park Facility Maintenance Request",2894,99.72],
+    ["Graffiti Removal - Park Property Case",1025,99.80],
+    ["Canada Geese Nests Case",276,100.00],
+    ["Park Drinking Fountain Maintenance Request",103,100.00],
+  ]
+};
+
+const srtInsights = {
+  DBL: "<strong>Volume concentration in two types:</strong> Building/Development Inquiry (81,895 tickets, 57% SLA) and Business Licence Request (49,599 tickets, 61% SLA) drive virtually all of DBL's missed volume. These are high-complexity regulatory processes — the 7-day benchmark is structurally misaligned here. The Business Licence Change of Use case (28.7% SLA) is a distinct anomaly worth isolating.",
+  PDS: "<strong>Anomaly flagged:</strong> Business Support Request Case — 312 tickets at 6.73% SLA — is a statistical outlier inconsistent with other PDS request types. This warrants direct investigation rather than systemic remediation. Overall PDS volume is low, meaning its contribution to total missed SLA is marginal despite poor rates.",
+  PR: "<strong>Single driver:</strong> City and Park Trees Maintenance (36,123 tickets, 60% SLA) is carrying PR's underperformance. Parks Washroom Servicing (11.6%) and Parks Operations & Maintenance (29.2%) have poor rates but lower volume. Seasonal testing recommended — outdoor maintenance workflows are likely weather-dependent."
+};
+
+const channels = [
+  ["Face To Face",5,60.00,0.00],
+  ["Mail",117,65.81,0.02],
+  ["Social Media",1105,70.50,0.14],
+  ["WEB",400546,70.97,51.48],
+  ["Mobile App",145112,76.43,15.15],
+  ["Phone",326059,77.75,32.12],
+  ["E-mail",4240,77.83,0.42],
+  ["Chat",7150,81.96,0.57],
+  ["Unknown",1300,82.15,0.10],
+  ["Mail Out",39,84.62,0.00],
+];
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+
+function slaColor(pct) {
+  if (pct < 50) return '#f75f5f';
+  if (pct < 65) return '#f7c94f';
+  if (pct < 80) return '#4f8ef7';
+  return '#4fbd7c';
+}
+
+function slaTextClass(pct) {
+  if (pct < 50) return 'text-bad';
+  if (pct < 65) return 'text-mid';
+  if (pct < 80) return 'text-ok';
+  return 'text-good';
+}
+
+// ── TIME SERIES CHART ─────────────────────────────────────────────────────────
+
+const cutoff = 36; // index where incomplete windows start (~Oct 2025)
+const tsLabels = timeSeries.map(d => d[0]);
+const tsRates  = timeSeries.map(d => d[2]);
+
+new Chart(document.getElementById('timeChart'), {
+  type: 'line',
+  data: {
+    labels: tsLabels,
+    datasets: [
+      {
+        label: 'SLA Rate %',
+        data: tsRates.slice(0, cutoff + 1),
+        borderColor: '#4f8ef7',
+        backgroundColor: 'rgba(79,142,247,0.08)',
+        borderWidth: 2,
+        pointRadius: 2,
+        pointHoverRadius: 5,
+        tension: 0.3,
+        fill: true,
+      },
+      {
+        label: 'Incomplete Window',
+        data: [...Array(cutoff).fill(null), ...tsRates.slice(cutoff)],
+        borderColor: '#f7c94f',
+        borderDash: [4, 4],
+        borderWidth: 1.5,
+        pointRadius: 2,
+        tension: 0.3,
+        fill: false,
+      },
+      {
+        label: 'Overall Avg (74.5%)',
+        data: Array(tsLabels.length).fill(74.5),
+        borderColor: 'rgba(255,255,255,0.15)',
+        borderDash: [6, 4],
+        borderWidth: 1,
+        pointRadius: 0,
+        fill: false,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: {
+        labels: {
+          color: '#6b7280',
+          font: { family: 'DM Mono', size: 10 },
+          boxWidth: 16,
+          padding: 16
+        }
+      },
+      tooltip: {
+        backgroundColor: '#13161e',
+        borderColor: '#252a38',
+        borderWidth: 1,
+        titleColor: '#e8eaf0',
+        bodyColor: '#6b7280',
+        titleFont: { family: 'DM Mono', size: 11 },
+        bodyFont: { family: 'DM Mono', size: 11 },
+        callbacks: {
+          label: ctx => ctx.raw !== null ? ` ${ctx.dataset.label}: ${ctx.raw}%` : null
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: '#6b7280',
+          font: { family: 'DM Mono', size: 9 },
+          maxTicksLimit: 12,
+          maxRotation: 0
+        },
+        grid: { color: 'rgba(255,255,255,0.04)' }
+      },
+      y: {
+        min: 55, max: 95,
+        ticks: {
+          color: '#6b7280',
+          font: { family: 'DM Mono', size: 10 },
+          callback: v => v + '%'
+        },
+        grid: { color: 'rgba(255,255,255,0.04)' }
+      }
+    }
+  }
+});
+
+// ── DEPARTMENT BARS ───────────────────────────────────────────────────────────
+
+const container = document.getElementById('deptBars');
+departments.forEach(([name, code, total, pct, miss]) => {
+  const row = document.createElement('div');
+  row.className = 'bar-row';
+  row.innerHTML = `
+    <span class="bar-label" title="${name} (${code})">${name}</span>
+    <div class="bar-track">
+      <div class="bar-fill" style="width:${pct}%; background:${slaColor(pct)}"></div>
+    </div>
+    <span class="bar-pct ${slaTextClass(pct)}">${pct}%</span>
+    <span class="bar-miss" style="color:var(--muted);font-size:10px;text-align:right">${total.toLocaleString()}</span>
+    <span class="bar-miss">${miss}% miss</span>
+  `;
+  container.appendChild(row);
+});
+
+// ── CHANNEL CHART ─────────────────────────────────────────────────────────────
+
+new Chart(document.getElementById('channelChart'), {
+  type: 'bar',
+  data: {
+    labels: channels.map(d => d[0]),
+    datasets: [
+      {
+        label: 'SLA Rate %',
+        data: channels.map(d => d[2]),
+        backgroundColor: channels.map(d => slaColor(d[2])),
+        borderRadius: 2,
+        yAxisID: 'y'
+      },
+      {
+        label: '% of Total Misses',
+        data: channels.map(d => d[3]),
+        type: 'line',
+        borderColor: '#f7914f',
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        pointRadius: 3,
+        yAxisID: 'y2'
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        labels: {
+          color: '#6b7280',
+          font: { family: 'DM Mono', size: 10 },
+          boxWidth: 12, padding: 12
+        }
+      },
+      tooltip: {
+        backgroundColor: '#13161e',
+        borderColor: '#252a38',
+        borderWidth: 1,
+        titleColor: '#e8eaf0',
+        bodyColor: '#6b7280',
+        titleFont: { family: 'DM Mono', size: 11 },
+        bodyFont: { family: 'DM Mono', size: 11 },
+      }
+    },
+    scales: {
+      x: {
+        ticks: { color: '#6b7280', font: { family: 'DM Mono', size: 9 }, maxRotation: 30 },
+        grid: { display: false }
+      },
+      y: {
+        min: 55, max: 90,
+        ticks: { color: '#6b7280', font: { family: 'DM Mono', size: 10 }, callback: v => v + '%' },
+        grid: { color: 'rgba(255,255,255,0.04)' }
+      },
+      y2: {
+        position: 'right',
+        ticks: { color: '#f7914f', font: { family: 'DM Mono', size: 10 }, callback: v => v + '%' },
+        grid: { display: false }
+      }
+    }
+  }
+});
+
+// ── SRT TABLE ─────────────────────────────────────────────────────────────────
+
+function showDept(code, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+
+  const tbody = document.getElementById('srtBody');
+  tbody.innerHTML = '';
+  srtData[code].forEach(([name, tickets, rate]) => {
+    const tr = document.createElement('tr');
+    const pillBg = slaColor(rate) + '22';
+    const pillText = slaColor(rate);
+    tr.innerHTML = `
+      <td>${name}</td>
+      <td>${tickets.toLocaleString()}</td>
+      <td><span class="sla-pill" style="background:${pillBg};color:${pillText}">${rate}%</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('srtInsight').innerHTML = srtInsights[code];
+}
+
+// ── DEPT CODE SUMMARY CHART ───────────────────────────────────────────────────
+
+const deptCodeRaw = {};
+departments.forEach(([name, code, total, pct, miss]) => {
+  if (!code) return;
+  if (!deptCodeRaw[code]) deptCodeRaw[code] = { met: 0, total: 0 };
+  const met = Math.round(total * pct / 100);
+  deptCodeRaw[code].met += met;
+  deptCodeRaw[code].total += total;
+});
+
+const deptCodes = Object.entries(deptCodeRaw).map(([code, d]) => ({
+  code,
+  sla: Math.round(d.met * 100 / d.total * 10) / 10,
+  total: d.total
+})).sort((a, b) => a.sla - b.sla);
+
+new Chart(document.getElementById('deptCodeChart'), {
+  type: 'bar',
+  data: {
+    labels: deptCodes.map(d => d.code),
+    datasets: [{
+      label: 'SLA Rate %',
+      data: deptCodes.map(d => d.sla),
+      backgroundColor: deptCodes.map(d => slaColor(d.sla)),
+      borderRadius: 3,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#13161e',
+        borderColor: '#252a38',
+        borderWidth: 1,
+        titleColor: '#e8eaf0',
+        bodyColor: '#6b7280',
+        titleFont: { family: 'DM Mono', size: 11 },
+        bodyFont: { family: 'DM Mono', size: 11 },
+        callbacks: {
+          label: ctx => {
+            const d = deptCodes[ctx.dataIndex];
+            return [` SLA Rate: ${d.sla}%`, ` Total Tickets: ${d.total.toLocaleString()}`];
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: { color: '#e8eaf0', font: { family: 'DM Mono', size: 12 } },
+        grid: { display: false }
+      },
+      y: {
+        min: 0, max: 100,
+        ticks: { color: '#6b7280', font: { family: 'DM Mono', size: 10 }, callback: v => v + '%' },
+        grid: { color: 'rgba(255,255,255,0.04)' }
+      }
+    }
+  }
+});
+
+showDept('DBL', document.querySelector('.tab.active'));
+</script>
+</body>
+</html>
