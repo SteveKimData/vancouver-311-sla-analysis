@@ -1,0 +1,11 @@
+"Channel","total_closed","sla_pct","pct_of_total_misses"
+Face To Face,5,60.0,0.0
+Mail,117,65.81,0.02
+Social Media,1105,70.5,0.14
+WEB,400546,70.97,51.48
+Mobile App,145112,76.43,15.15
+Phone,326059,77.75,32.12
+E-mail,4240,77.83,0.42
+Chat,7150,81.96,0.57
+Unknown,1300,82.15,0.1
+Mail Out,39,84.62,0.0
