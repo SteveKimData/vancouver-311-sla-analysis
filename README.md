@@ -19,7 +19,7 @@ Analysis shows that overall SLA compliance is 74.50% but with 35.15% of missed v
 ## Tools
 
 - **SQL (SQLite)** — data cleaning, transformation, and analysis
-- **Dashboard** — interactive visualization built on analysis outputs, AI assisted
+- **Dashboard** — interactive visualization built on analysis outputs
 
 ---
 
